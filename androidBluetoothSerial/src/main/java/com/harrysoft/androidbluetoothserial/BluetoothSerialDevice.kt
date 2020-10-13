@@ -36,6 +36,13 @@ interface BluetoothSerialDevice {
     fun send(message: String): Completable
 
     /**
+     * @param message The message to send to the device
+     * @return An RxJava Completable to asynchronously
+     * send the message.
+     */
+    fun sendraw(message: ByteArray): Completable
+
+    /**
      * @return An RxJava Flowable that, when observed,
      * will provide a stream of messages from the device.
      * A message is considered to be terminated by a

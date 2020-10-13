@@ -1,6 +1,7 @@
 package com.harrysoft.androidbluetoothserial.demoapp;
 
 import android.app.Application;
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -156,11 +157,25 @@ public class CommunicateViewModel extends AndroidViewModel {
     }
 
     // Send a message
-    public void sendMessage(String message) {
-        // Check we have a connected device and the message is not empty, then send the message
-        if (deviceInterface != null && !TextUtils.isEmpty(message)) {
-            deviceInterface.sendMessage(message);
+    public void sendMessage(int color) {
+        byte[] data = new byte[5*5+1];
+        if (deviceInterface != null) {
+            for (byte i = 0; i < 5; i++) {
+
+                byte r = (byte) Color.red(color);
+                byte g = (byte) Color.green(color);
+                byte b = (byte) Color.blue(color);
+                data[i*5 + 0] = 'L';
+                data[i*5 + 1] = i;
+                data[i*5 + 2] = r;
+                data[i*5 + 3] = g;
+                data[i*5 + 4] = b;
+
+            }
+            data[5*5] = 'S';
+            deviceInterface.sendRaw(data);
         }
+
     }
 
     // Called when the activity finishes - clear up after ourselves.

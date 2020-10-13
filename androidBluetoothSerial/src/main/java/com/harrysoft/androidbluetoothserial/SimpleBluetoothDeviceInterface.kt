@@ -8,6 +8,8 @@ interface SimpleBluetoothDeviceInterface {
 
     fun sendMessage(message: String)
 
+    fun sendRaw(message: ByteArray)
+
     /**
      * Set all of the listeners for the interfact
      *

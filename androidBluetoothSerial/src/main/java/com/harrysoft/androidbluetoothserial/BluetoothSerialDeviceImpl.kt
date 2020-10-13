@@ -35,6 +35,15 @@ internal class BluetoothSerialDeviceImpl constructor(
         }
     }
 
+    override fun sendraw(message: ByteArray): Completable {
+        checkNotClosed()
+        return Completable.fromAction {
+            synchronized(outputStream) {
+                if (!closed.get()) outputStream.write(message)
+            }
+        }
+    }
+
     override fun openMessageStream(): Flowable<String> {
         checkNotClosed()
         return Flowable.create({ emitter ->
@@ -61,7 +70,7 @@ internal class BluetoothSerialDeviceImpl constructor(
         if (!closed.get()) {
             closed.set(true)
             inputStream.close()
-            soutputStream.close()
+            outputStream.close()
             socket.close()
         }
         owner?.close()

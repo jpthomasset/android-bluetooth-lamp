@@ -10,11 +10,16 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.larswerkman.holocolorpicker.ColorPicker;
+import com.larswerkman.holocolorpicker.SaturationBar;
+import com.larswerkman.holocolorpicker.ValueBar;
+
 public class CommunicateActivity extends AppCompatActivity {
 
-    private TextView connectionText, messagesView;
-    private EditText messageBox;
     private Button sendButton, connectButton;
+    private ColorPicker picker;
+    private SaturationBar saturationBar;
+    private ValueBar valueBar;
 
     private CommunicateViewModel viewModel;
 
@@ -38,38 +43,31 @@ public class CommunicateActivity extends AppCompatActivity {
         }
 
         // Setup our Views
-        connectionText = findViewById(R.id.communicate_connection_text);
-        messagesView = findViewById(R.id.communicate_messages);
-        messageBox = findViewById(R.id.communicate_message);
         sendButton = findViewById(R.id.communicate_send);
         connectButton = findViewById(R.id.communicate_connect);
+
+        picker = findViewById(R.id.picker);
+        saturationBar = findViewById(R.id.saturationbar);
+        valueBar = findViewById(R.id.valuebar);
+
+        picker.addSaturationBar(saturationBar);
+        picker.addValueBar(valueBar);
 
         // Start observing the data sent to us by the ViewModel
         viewModel.getConnectionStatus().observe(this, this::onConnectionStatus);
         viewModel.getDeviceName().observe(this, name -> setTitle(getString(R.string.device_name_format, name)));
-        viewModel.getMessages().observe(this, message -> {
-            if (TextUtils.isEmpty(message)) {
-                message = getString(R.string.no_messages);
-            }
-            messagesView.setText(message);
-        });
-        viewModel.getMessage().observe(this, message -> {
-            // Only update the message if the ViewModel is trying to reset it
-            if (TextUtils.isEmpty(message)) {
-                messageBox.setText(message);
-            }
-        });
 
         // Setup the send button click action
-        sendButton.setOnClickListener(v -> viewModel.sendMessage(messageBox.getText().toString()));
+        sendButton.setOnClickListener(v -> {
+            viewModel.sendMessage(picker.getColor());
+            picker.setOldCenterColor(picker.getColor());
+        });
     }
 
     // Called when the ViewModel updates us of our connectivity status
     private void onConnectionStatus(CommunicateViewModel.ConnectionStatus connectionStatus) {
         switch (connectionStatus) {
             case CONNECTED:
-                connectionText.setText(R.string.status_connected);
-                messageBox.setEnabled(true);
                 sendButton.setEnabled(true);
                 connectButton.setEnabled(true);
                 connectButton.setText(R.string.disconnect);
@@ -77,16 +75,12 @@ public class CommunicateActivity extends AppCompatActivity {
                 break;
 
             case CONNECTING:
-                connectionText.setText(R.string.status_connecting);
-                messageBox.setEnabled(false);
                 sendButton.setEnabled(false);
                 connectButton.setEnabled(false);
                 connectButton.setText(R.string.connect);
                 break;
 
             case DISCONNECTED:
-                connectionText.setText(R.string.status_disconnected);
-                messageBox.setEnabled(false);
                 sendButton.setEnabled(false);
                 connectButton.setEnabled(true);
                 connectButton.setText(R.string.connect);

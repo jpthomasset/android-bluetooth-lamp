@@ -29,6 +29,14 @@ internal class SimpleBluetoothDeviceInterfaceImpl(override val device: Bluetooth
                 .subscribe({ messageSentListener?.onMessageSent(message) }, { errorListener?.onError(it) }))
     }
 
+    override fun sendRaw(message: ByteArray) {
+        device.checkNotClosed()
+        compositeDisposable.add(device.sendraw(message)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ messageSentListener?.onMessageSent(String(message)) }, { errorListener?.onError(it) }))
+    }
+
     override fun setListeners(messageReceivedListener: SimpleBluetoothDeviceInterface.OnMessageReceivedListener?,
                               messageSentListener: SimpleBluetoothDeviceInterface.OnMessageSentListener?,
                               errorListener: SimpleBluetoothDeviceInterface.OnErrorListener?) {
